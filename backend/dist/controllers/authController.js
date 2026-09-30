@@ -3,38 +3,53 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import User from "../models/User.js";
 import { sendRegistrationEmail, sendPasswordChangedEmail, sendPasswordResetEmail, } from "../services/emailService.js";
+const generateStaffId = async () => {
+    const lastUser = await User.findOne({
+        staffId: /^LHR\d+$/,
+    })
+        .sort({ staffId: -1 })
+        .select("staffId")
+        .lean();
+    if (!lastUser) {
+        return "LHR001";
+    }
+    const lastNumber = Number(lastUser.staffId.replace("LHR", ""));
+    const nextNumber = lastNumber + 1;
+    return `LHR${String(nextNumber).padStart(3, "0")}`;
+};
 export const register = async (req, res) => {
     try {
-        const { staffId, fullName, email, password, phone, faculty, department, academicRank, dateOfEmployment, } = req.body;
-        if (!staffId || !fullName || !email || !password) {
+        const { fullName, email, password } = req.body;
+        if (!fullName || !email || !password) {
             return res.status(400).json({
                 success: false,
-                message: "Staff ID, full name, email and password are required",
+                message: "Full name, email and password are required",
             });
         }
         const existingUser = await User.findOne({
-            $or: [{ email: email.toLowerCase() }, { staffId }],
+            email: email.toLowerCase(),
         });
         if (existingUser) {
             return res.status(409).json({
                 success: false,
-                message: "A user with this email or staff ID already exists",
+                message: "A user with this email already exists",
             });
         }
+        const staffId = await generateStaffId();
         const hashedPassword = await bcrypt.hash(password, 12);
         const user = await User.create({
             staffId,
             fullName,
             email: email.toLowerCase(),
             password: hashedPassword,
-            phone,
-            faculty,
-            department,
-            academicRank,
-            dateOfEmployment,
             role: "LECTURER",
         });
-        await sendRegistrationEmail(user.email, user.fullName, user.staffId);
+        try {
+            await sendRegistrationEmail(user.email, user.fullName, user.staffId);
+        }
+        catch (emailError) {
+            console.error("Registration email error:", emailError);
+        }
         return res.status(201).json({
             success: true,
             message: "Lecturer registered successfully",
@@ -148,7 +163,12 @@ export const changePassword = async (req, res) => {
         }
         user.password = await bcrypt.hash(newPassword, 12);
         await user.save();
-        await sendPasswordChangedEmail(user.email, user.fullName);
+        try {
+            await sendPasswordChangedEmail(user.email, user.fullName);
+        }
+        catch (emailError) {
+            console.error("Password changed email error:", emailError);
+        }
         return res.status(200).json({
             success: true,
             message: "Password changed successfully",
@@ -174,7 +194,6 @@ export const forgotPassword = async (req, res) => {
         const user = await User.findOne({
             email: email.toLowerCase(),
         });
-        // Always return the same response whether the account exists or not.
         if (!user) {
             return res.status(200).json({
                 success: true,
@@ -189,10 +208,22 @@ export const forgotPassword = async (req, res) => {
         user.passwordResetToken = hashedResetToken;
         user.passwordResetExpires = new Date(Date.now() + 30 * 60 * 1000);
         await user.save();
-        await sendPasswordResetEmail(user.email, resetToken);
+        try {
+            await sendPasswordResetEmail(user.email, resetToken);
+        }
+        catch (emailError) {
+            console.error("Password reset email error:", emailError);
+            user.passwordResetToken = undefined;
+            user.passwordResetExpires = undefined;
+            await user.save();
+            return res.status(500).json({
+                success: false,
+                message: "Unable to send the password reset email. Please try again.",
+            });
+        }
         return res.status(200).json({
             success: true,
-            message: "If an account with that email exists, a password reset link has been sent.",
+            message: "Password reset link sent successfully. Please check your email.",
         });
     }
     catch (error) {
@@ -218,10 +249,7 @@ export const resetPassword = async (req, res) => {
                 message: "New password must be at least 8 characters",
             });
         }
-        const hashedToken = crypto
-            .createHash("sha256")
-            .update(token)
-            .digest("hex");
+        const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
         const user = await User.findOne({
             passwordResetToken: hashedToken,
             passwordResetExpires: {
@@ -238,7 +266,12 @@ export const resetPassword = async (req, res) => {
         user.passwordResetToken = undefined;
         user.passwordResetExpires = undefined;
         await user.save();
-        await sendPasswordChangedEmail(user.email, user.fullName);
+        try {
+            await sendPasswordChangedEmail(user.email, user.fullName);
+        }
+        catch (emailError) {
+            console.error("Password reset email error:", emailError);
+        }
         return res.status(200).json({
             success: true,
             message: "Password reset successfully",

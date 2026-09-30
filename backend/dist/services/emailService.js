@@ -4,18 +4,16 @@ const emailPassword = process.env.EMAIL_PASSWORD;
 const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
 const emailEnabled = Boolean(emailUser && emailPassword);
 const transporter = emailEnabled
-  ? nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: emailUser,
-        pass: emailPassword,
-      },
+    ? nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: emailUser,
+            pass: emailPassword,
+        },
     })
-  : null;
+    : null;
 if (!emailEnabled) {
-  console.warn(
-    "Email service is disabled. Add EMAIL_USER and EMAIL_PASSWORD to .env to enable emails.",
-  );
+    console.warn("Email service is disabled. Add EMAIL_USER and EMAIL_PASSWORD to .env to enable emails.");
 }
 const emailTemplate = (content) => `
 <!DOCTYPE html>
@@ -95,25 +93,20 @@ const emailTemplate = (content) => `
 </html>
 `;
 export const sendEmail = async (to, subject, content) => {
-  if (!transporter) {
-    console.warn(
-      `Email skipped because email service is disabled. Recipient: ${to}`,
-    );
-    return;
-  }
-  await transporter.sendMail({
-    from: `"CampusHR" <${emailUser}>`,
-    to,
-    subject,
-    html: emailTemplate(content),
-  });
+    if (!transporter) {
+        console.warn(`Email skipped because email service is disabled. Recipient: ${to}`);
+        return;
+    }
+    await transporter.sendMail({
+        from: `"CampusHR" <${emailUser}>`,
+        to,
+        subject,
+        html: emailTemplate(content),
+    });
 };
 export const sendRegistrationEmail = async (to, fullName, staffId) => {
-  const loginUrl = `${frontendUrl}/login`;
-  await sendEmail(
-    to,
-    "Welcome to CampusHR",
-    `
+    const loginUrl = `${frontendUrl}/login`;
+    await sendEmail(to, "Welcome to CampusHR", `
       <h2 style="
         margin: 0 0 12px;
         color: #0f172a;
@@ -163,15 +156,11 @@ export const sendRegistrationEmail = async (to, fullName, staffId) => {
           Log in to CampusHR
         </a>
       </div>
-    `,
-  );
+    `);
 };
 export const sendPasswordResetEmail = async (to, resetToken) => {
-  const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
-  await sendEmail(
-    to,
-    "CampusHR — Reset Your Password",
-    `
+    const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
+    await sendEmail(to, "CampusHR — Reset Your Password", `
       <h2 style="
         margin: 0 0 12px;
         color: #0f172a;
@@ -209,15 +198,11 @@ export const sendPasswordResetEmail = async (to, resetToken) => {
         This link expires in 30 minutes.
         If you did not request a password reset, you can simply ignore this email.
       </p>
-    `,
-  );
+    `);
 };
 export const sendPasswordChangedEmail = async (to, fullName) => {
-  const loginUrl = `${frontendUrl}/login`;
-  await sendEmail(
-    to,
-    "CampusHR — Password Changed",
-    `
+    const loginUrl = `${frontendUrl}/login`;
+    await sendEmail(to, "CampusHR — Password Changed", `
       <h2 style="
         margin: 0 0 12px;
         color: #0f172a;
@@ -251,19 +236,10 @@ export const sendPasswordChangedEmail = async (to, fullName) => {
           Log in to CampusHR
         </a>
       </div>
-    `,
-  );
+    `);
 };
-export const sendAnnouncementEmail = async (
-  to,
-  lecturerName,
-  title,
-  content,
-) => {
-  await sendEmail(
-    to,
-    `CampusHR — ${title}`,
-    `
+export const sendAnnouncementEmail = async (to, lecturerName, title, content) => {
+    await sendEmail(to, `CampusHR — ${title}`, `
       <p>
         Dear ${lecturerName},
       </p>
@@ -305,6 +281,5 @@ export const sendAnnouncementEmail = async (
           Open CampusHR
         </a>
       </div>
-    `,
-  );
+    `);
 };
