@@ -1,0 +1,13 @@
+import { Router } from "express";
+import { createAnnouncement, getAnnouncements, getAdminAnnouncements, updateAnnouncement, scheduleAnnouncement, cancelScheduledAnnouncement, publishAnnouncement, deleteAnnouncement, } from "../controllers/announcementController.js";
+import { protect, authorizeRoles, } from "../middleware/authMiddleware.js";
+const router = Router();
+router.get("/", protect, getAnnouncements);
+router.get("/admin", protect, authorizeRoles("HR_ADMIN"), getAdminAnnouncements);
+router.post("/", protect, authorizeRoles("HR_ADMIN"), createAnnouncement);
+router.put("/:id", protect, authorizeRoles("HR_ADMIN"), updateAnnouncement);
+router.patch("/:id/schedule", protect, authorizeRoles("HR_ADMIN"), scheduleAnnouncement);
+router.patch("/:id/cancel-schedule", protect, authorizeRoles("HR_ADMIN"), cancelScheduledAnnouncement);
+router.patch("/:id/publish", protect, authorizeRoles("HR_ADMIN"), publishAnnouncement);
+router.delete("/:id", protect, authorizeRoles("HR_ADMIN"), deleteAnnouncement);
+export default router;
