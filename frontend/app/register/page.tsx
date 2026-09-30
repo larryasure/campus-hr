@@ -103,7 +103,7 @@ export default function RegisterPage() {
       }
 
       setSuccess(
-        `${data.message}. Your Staff ID is ${data.user.staffId}.`,
+        `${data.message}`,
       );
 
       form.reset();

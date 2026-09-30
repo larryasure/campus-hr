@@ -2,10 +2,7 @@ import { Response } from "express";
 import User from "../models/User.js";
 import { AuthRequest } from "../middleware/authMiddleware.js";
 
-export const getProfile = async (
-  req: AuthRequest,
-  res: Response
-) => {
+export const getProfile = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -37,11 +34,7 @@ export const getProfile = async (
   }
 };
 
-
-export const updateProfile = async (
-  req: AuthRequest,
-  res: Response
-) => {
+export const updateProfile = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -124,6 +117,60 @@ export const updateProfile = async (
     return res.status(500).json({
       success: false,
       message: "Server error while updating profile",
+    });
+  }
+};
+
+export const getAllLecturers = async (req: AuthRequest, res: Response) => {
+  try {
+    const {
+      search = "",
+      faculty = "",
+      department = "",
+      academicRank = "",
+    } = req.query;
+
+    const filter: Record<string, unknown> = {
+      role: "LECTURER",
+    };
+
+    if (search) {
+      const searchRegex = new RegExp(String(search), "i");
+
+      filter.$or = [
+        { fullName: searchRegex },
+        { email: searchRegex },
+        { staffId: searchRegex },
+      ];
+    }
+
+    if (faculty) {
+      filter.faculty = String(faculty);
+    }
+
+    if (department) {
+      filter.department = String(department);
+    }
+
+    if (academicRank) {
+      filter.academicRank = String(academicRank);
+    }
+
+    const lecturers = await User.find(filter)
+      .select("-password")
+      .sort({ fullName: 1 })
+      .lean();
+
+    return res.status(200).json({
+      success: true,
+      data: lecturers,
+    });
+  } catch (error) {
+    console.error("Get all lecturers error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error while fetching lecturers",
     });
   }
 };

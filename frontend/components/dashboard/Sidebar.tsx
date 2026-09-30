@@ -5,12 +5,12 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   Bell,
   BookOpen,
+  BriefcaseBusiness,
   ClipboardList,
   GraduationCap,
   LayoutDashboard,
   LogOut,
   Users,
-  BriefcaseBusiness,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -65,7 +65,7 @@ export default function Sidebar({ isAdmin }: SidebarProps) {
   const adminLinks = [
     {
       label: "Dashboard",
-      href: "/dashboard",
+      href: "/dashboard/admin",
       icon: LayoutDashboard,
     },
     {
@@ -94,6 +94,7 @@ export default function Sidebar({ isAdmin }: SidebarProps) {
 
   const handleConfirmLogout = () => {
     logout();
+    setIsLogoutModalOpen(false);
     router.replace("/login");
   };
 
@@ -131,8 +132,9 @@ export default function Sidebar({ isAdmin }: SidebarProps) {
               const Icon = link.icon;
 
               const isActive =
-                link.href === "/dashboard"
-                  ? pathname === "/dashboard"
+                link.href === "/dashboard" ||
+                link.href === "/dashboard/admin"
+                  ? pathname === link.href
                   : pathname.startsWith(link.href);
 
               return (

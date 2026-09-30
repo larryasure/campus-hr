@@ -12,6 +12,7 @@ import requestRoutes from "./routes/requestRoutes.js";
 import adminRequestRoutes from "./routes/adminRequestRoutes.js";
 import announcementRoutes from "./routes/announcementRoutes.js";
 import academicSessionRoutes from "./routes/academicSessionRoutes.js";
+import adminLecturerRoutes from "./routes/adminLecturerRoutes.js";
 const app = express();
 const PORT = process.env.PORT || 5000;
 app.use(cors());
@@ -21,9 +22,10 @@ app.use("/api/lecturers", lecturerRoutes);
 app.use("/api/academic-records", academicRecordRoutes);
 app.use("/api/workload", workloadRoutes);
 app.use("/api/requests", requestRoutes);
-app.use("/api/admin/requests", adminRequestRoutes);
 app.use("/api/announcements", announcementRoutes);
 app.use("/api/academic-sessions", academicSessionRoutes);
+app.use("/api/admin/requests", adminRequestRoutes);
+app.use("/api/admin/lecturers", adminLecturerRoutes);
 app.get("/api/check", (_req, res) => {
     res.json({
         success: true,

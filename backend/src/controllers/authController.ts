@@ -63,11 +63,12 @@ export const register = async (req: Request, res: Response) => {
       role: "LECTURER",
     });
 
-    try {
-      await sendRegistrationEmail(user.email, user.fullName, user.staffId);
-    } catch (emailError) {
-      console.error("Registration email error:", emailError);
-    }
+    // Send the registration email without blocking the registration response.
+    void sendRegistrationEmail(user.email, user.fullName, user.staffId).catch(
+      (emailError) => {
+        console.error("Registration email error:", emailError);
+      },
+    );
 
     return res.status(201).json({
       success: true,

@@ -9,19 +9,26 @@ const createAdmin = async () => {
         if (!uri) {
             throw new Error("MONGODB_URI is not defined");
         }
-        await mongoose.connect(uri);
-        const email = process.env.ADMIN_EMAIL;
+        const email = process.env.ADMIN_EMAIL?.toLowerCase().trim();
         const password = process.env.ADMIN_PASSWORD;
         if (!email || !password) {
             throw new Error("ADMIN_EMAIL and ADMIN_PASSWORD are required");
         }
-        const existingAdmin = await User.findOne({ email });
+        await mongoose.connect(uri);
+        const hashedPassword = await bcrypt.hash(password, 12);
+        const existingAdmin = await User.findOne({
+            email,
+        });
         if (existingAdmin) {
-            console.log("HR Admin already exists.");
+            existingAdmin.password = hashedPassword;
+            existingAdmin.role = "HR_ADMIN";
+            existingAdmin.employmentStatus = "ACTIVE";
+            await existingAdmin.save();
+            console.log("HR Admin password reset successfully.");
+            console.log(`Email: ${email}`);
             await mongoose.disconnect();
             return;
         }
-        const hashedPassword = await bcrypt.hash(password, 12);
         await User.create({
             staffId: "HR001",
             fullName: "HR Administrator",
@@ -32,7 +39,6 @@ const createAdmin = async () => {
         });
         console.log("HR Admin created successfully.");
         console.log(`Email: ${email}`);
-        console.log(`Password: ${password}`);
         await mongoose.disconnect();
     }
     catch (error) {

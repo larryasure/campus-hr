@@ -100,3 +100,43 @@ export const updateProfile = async (req, res) => {
         });
     }
 };
+export const getAllLecturers = async (req, res) => {
+    try {
+        const { search = "", faculty = "", department = "", academicRank = "", } = req.query;
+        const filter = {
+            role: "LECTURER",
+        };
+        if (search) {
+            const searchRegex = new RegExp(String(search), "i");
+            filter.$or = [
+                { fullName: searchRegex },
+                { email: searchRegex },
+                { staffId: searchRegex },
+            ];
+        }
+        if (faculty) {
+            filter.faculty = String(faculty);
+        }
+        if (department) {
+            filter.department = String(department);
+        }
+        if (academicRank) {
+            filter.academicRank = String(academicRank);
+        }
+        const lecturers = await User.find(filter)
+            .select("-password")
+            .sort({ fullName: 1 })
+            .lean();
+        return res.status(200).json({
+            success: true,
+            data: lecturers,
+        });
+    }
+    catch (error) {
+        console.error("Get all lecturers error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error while fetching lecturers",
+        });
+    }
+};
