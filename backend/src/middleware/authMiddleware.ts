@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
 export interface AuthRequest extends Request {
@@ -11,19 +11,28 @@ export interface AuthRequest extends Request {
 export const protect = (
   req: AuthRequest,
   res: Response,
-  next: NextFunction
-) => {
+  next: NextFunction,
+): void => {
   try {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         message: "Authentication required",
       });
+      return;
     }
 
     const token = authHeader.split(" ")[1];
+
+    if (!token) {
+      res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+      return;
+    }
 
     const jwtSecret = process.env.JWT_SECRET;
 
@@ -43,7 +52,9 @@ export const protect = (
 
     next();
   } catch (error) {
-    return res.status(401).json({
+    console.error("Authentication error:", error);
+
+    res.status(401).json({
       success: false,
       message: "Invalid or expired token",
     });
@@ -56,20 +67,22 @@ export const authorizeRoles = (
   return (
     req: AuthRequest,
     res: Response,
-    next: NextFunction
-  ) => {
+    next: NextFunction,
+  ): void => {
     if (!req.user) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         message: "Authentication required",
       });
+      return;
     }
 
     if (!allowedRoles.includes(req.user.role)) {
-      return res.status(403).json({
+      res.status(403).json({
         success: false,
         message: "Access denied",
       });
+      return;
     }
 
     next();

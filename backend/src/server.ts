@@ -2,6 +2,7 @@ import "dotenv/config";
 
 import express from "express";
 import cors from "cors";
+import type { Request, Response } from "express";
 
 import { connectDB } from "./config/db.js";
 import { startAnnouncementJob } from "./jobs/announcementJob.js";
@@ -21,9 +22,6 @@ import announcementRoutes from "./routes/announcementRoutes.js";
 import academicSessionRoutes from "./routes/academicSessionRoutes.js";
 import adminLecturerRoutes from "./routes/adminLecturerRoutes.js";
 
-
-
-
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -40,26 +38,30 @@ app.use("/api/academic-sessions", academicSessionRoutes);
 app.use("/api/admin/requests", adminRequestRoutes);
 app.use("/api/admin/lecturers", adminLecturerRoutes);
 
-app.get("/api/check", (_req, res) => {
+app.get("/api/check", (_req: Request, res: Response) => {
   res.json({
     success: true,
     message: "University HR API is running",
   });
 });
 
-app.get("/api/test/protected", protect, (req: AuthRequest, res) => {
-  res.json({
-    success: true,
-    message: "You have access to this protected route",
-    user: req.user,
-  });
-});
+app.get(
+  "/api/test/protected",
+  protect,
+  (req: AuthRequest, res: Response) => {
+    res.json({
+      success: true,
+      message: "You have access to this protected route",
+      user: req.user,
+    });
+  },
+);
 
 app.get(
   "/api/admin/test",
   protect,
   authorizeRoles("HR_ADMIN"),
-  (req: AuthRequest, res) => {
+  (req: AuthRequest, res: Response) => {
     res.json({
       success: true,
       message: "HR Admin access confirmed",
