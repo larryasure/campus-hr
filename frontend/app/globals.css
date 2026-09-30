@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f3f4f6;
+  --foreground: #0f172a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: #f3f4f6;
+  color: #0f172a;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #f3f4f6;
+  color: #0f172a;
+  font-family: var(--font-inter), Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+svg {
+  display: block;
+}
+
+::selection {
+  background: #dbeafe;
+  color: #1e3a8a;
+}
+
+/*
+  CampusHR color utilities.
+  These provide a reliable fallback for the most important
+  text colors used throughout the application.
+*/
+
+.campushr-text {
+  color: #0f172a;
+}
+
+.campushr-muted {
+  color: #64748b;
+}
+
+.campushr-subtle {
+  color: #94a3b8;
+}
+
+.campushr-blue {
+  color: #2563eb;
+}
+
+.campushr-white {
+  color: #ffffff;
+}
