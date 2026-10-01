@@ -1,4 +1,5 @@
 import { FileText } from "lucide-react";
+
 import type { HRRequest } from "@/types";
 
 interface RequestOverviewProps {
@@ -23,17 +24,17 @@ export default function RequestOverview({ requests }: RequestOverviewProps) {
   const recentRequests = requests.slice(0, 5);
 
   return (
-    <section className="border border-slate-200 bg-white">
-      <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-        <div>
+    <section className="min-w-0 max-w-full overflow-hidden border border-slate-200 bg-white">
+      <div className="flex min-w-0 items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
+        <div className="min-w-0">
           <h2 className="text-sm font-semibold text-slate-900">HR Requests</h2>
 
-          <p className="mt-0.5 text-xs text-slate-500">
+          <p className="mt-0.5 wrap-break-word text-xs text-slate-500">
             Recent requests and their current status
           </p>
         </div>
 
-        <FileText className="h-4 w-4 text-blue-600" />
+        <FileText className="h-4 w-4 shrink-0 text-blue-600" />
       </div>
 
       {recentRequests.length === 0 ? (
@@ -44,7 +45,7 @@ export default function RequestOverview({ requests }: RequestOverviewProps) {
             No HR requests
           </p>
 
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 wrap-break-word text-xs text-slate-500">
             Requests you submit will appear here.
           </p>
         </div>
@@ -53,20 +54,20 @@ export default function RequestOverview({ requests }: RequestOverviewProps) {
           {recentRequests.map((request) => (
             <div
               key={request._id}
-              className="flex items-center justify-between gap-4 px-4 py-3"
+              className="flex min-w-0 flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
             >
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-slate-800">
+              <div className="min-w-0 flex-1">
+                <p className="wrap-break-word text-sm font-medium leading-5 text-slate-800">
                   {request.subject}
                 </p>
 
-                <p className="mt-0.5 text-xs text-slate-500">
+                <p className="mt-0.5 wrap-break-word text-xs text-slate-500">
                   {request.type.replace(/_/g, " ")}
                 </p>
               </div>
 
               <span
-                className={`shrink-0 rounded-md px-2 py-1 text-[11px] font-medium ${
+                className={`w-fit max-w-full shrink-0 rounded-md px-2 py-1 text-[11px] font-medium ${
                   statusStyles[request.status]
                 }`}
               >

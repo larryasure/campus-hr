@@ -23,6 +23,23 @@ if (!emailEnabled) {
   );
 }
 
+if (transporter) {
+  transporter
+    .verify()
+    .then(() => {
+      console.log("Email SMTP connection verified successfully.");
+    })
+    .catch((error) => {
+      console.error("Email SMTP verification failed:", {
+        code: error?.code,
+        command: error?.command,
+        response: error?.response,
+        responseCode: error?.responseCode,
+        message: error?.message,
+      });
+    });
+}
+
 const emailTemplate = (content: string) => `
 <!DOCTYPE html>
 <html lang="en">
@@ -114,12 +131,35 @@ export const sendEmail = async (
     return;
   }
 
-  await transporter.sendMail({
-    from: `"CampusHR" <${emailUser}>`,
-    to,
-    subject,
-    html: emailTemplate(content),
-  });
+  try {
+    const result = await transporter.sendMail({
+      from: `"CampusHR" <${emailUser}>`,
+      to,
+      subject,
+      html: emailTemplate(content),
+    });
+
+    console.log("Email sent successfully:", {
+      to,
+      subject,
+      messageId: result.messageId,
+      response: result.response,
+    });
+
+    return result;
+  } catch (error: any) {
+    console.error("Email sending failed:", {
+      to,
+      subject,
+      code: error?.code,
+      command: error?.command,
+      response: error?.response,
+      responseCode: error?.responseCode,
+      message: error?.message,
+    });
+
+    throw error;
+  }
 };
 
 export const sendRegistrationEmail = async (
@@ -231,7 +271,7 @@ export const sendPasswordResetEmail = async (
         font-size: 13px;
       ">
         This link expires in 30 minutes.
-        If you did not request a password reset, you can simply ignore this email.
+        If you did not request this password reset, you can simply ignore this email.
       </p>
     `,
   );

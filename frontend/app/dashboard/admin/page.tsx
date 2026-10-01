@@ -23,6 +23,8 @@ export default function AdminDashboardPage() {
   const [lecturers, setLecturers] = useState<User[]>([]);
   const [requests, setRequests] = useState<HRRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentDate, setCurrentDate] = useState("");
+  const [greeting, setGreeting] = useState("Good morning");
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -45,6 +47,62 @@ export default function AdminDashboardPage() {
     };
 
     loadDashboard();
+  }, []);
+
+  useEffect(() => {
+    const updateDateTime = () => {
+      const now = new Date();
+
+      const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+      const formattedDate = new Intl.DateTimeFormat("en-GB", {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        timeZone: browserTimeZone,
+      }).format(now);
+
+      const formattedTime = new Intl.DateTimeFormat("en-GB", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+        timeZone: browserTimeZone,
+      }).format(now);
+
+      setCurrentDate(`${formattedDate} • ${formattedTime}`);
+
+      /*
+       * Use the user's local browser time for the greeting.
+       *
+       * 5:00 AM - 11:59 AM  -> Good morning
+       * 12:00 PM - 4:59 PM  -> Good afternoon
+       * 5:00 PM - 4:59 AM   -> Good evening
+       */
+      const currentHour = Number(
+        new Intl.DateTimeFormat("en-US", {
+          hour: "numeric",
+          hour12: false,
+          timeZone: browserTimeZone,
+        }).format(now),
+      );
+
+      if (currentHour >= 5 && currentHour < 12) {
+        setGreeting("Good morning");
+      } else if (currentHour >= 12 && currentHour < 17) {
+        setGreeting("Good afternoon");
+      } else {
+        setGreeting("Good evening");
+      }
+    };
+
+    updateDateTime();
+
+    const interval = window.setInterval(updateDateTime, 60 * 1000);
+
+    return () => {
+      window.clearInterval(interval);
+    };
   }, []);
 
   const activeLecturers = useMemo(
@@ -80,11 +138,11 @@ export default function AdminDashboardPage() {
     <div className="space-y-6">
       {/* Header */}
       <header className="flex flex-col gap-1 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
-        <div>
+        <div className="min-w-0">
           <p className="text-xs font-medium text-blue-600">Human Resources</p>
 
           <h1 className="mt-1 text-lg font-semibold tracking-tight text-slate-900">
-            Good morning, {profile?.fullName?.split(" ")[0] || "Admin"}
+            {greeting}, {profile?.fullName?.split(" ")[0] || "Admin"}
           </h1>
 
           <p className="mt-1 text-xs text-slate-500">
@@ -92,47 +150,41 @@ export default function AdminDashboardPage() {
           </p>
         </div>
 
-        <p className="text-xs text-slate-400">
-          {new Intl.DateTimeFormat("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          }).format(new Date())}
-        </p>
+        <p className="text-xs text-slate-400">{currentDate}</p>
       </header>
 
       {/* Metrics */}
-      <section className="grid grid-cols-2 border  border-slate-200 bg-white lg:grid-cols-4">
+      <section className="grid grid-cols-2 border border-slate-200 bg-white lg:grid-cols-4">
         <Metric icon={Users} label="Lecturers" value={lecturers.length} />
 
         <Metric
           icon={Clock3}
-          label="Pending Request"
+          label="Pending Requests"
           value={pendingRequests.length}
           bordered
         />
 
         <Metric
           icon={CheckCircle2}
-          label="Approved Request"
+          label="Approved Requests"
           value={approvedRequests}
           bordered
         />
 
         <Metric
           icon={Bell}
-          label="Active staff"
+          label="Active Staff"
           value={activeLecturers}
           bordered
         />
       </section>
 
       {/* Main content */}
-      <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
+      <section className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
         {/* Requests */}
-        <div className="border border-slate-200 bg-white">
-          <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-            <div>
+        <div className="min-w-0 border border-slate-200 bg-white">
+          <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
+            <div className="min-w-0">
               <h2 className="text-sm font-semibold text-slate-900">Requests</h2>
 
               <p className="mt-0.5 text-[11px] text-slate-400">
@@ -142,7 +194,7 @@ export default function AdminDashboardPage() {
 
             <a
               href="/dashboard/admin/requests"
-              className="flex items-center gap-1 text-[11px] font-medium text-blue-600 hover:text-blue-700"
+              className="flex shrink-0 items-center gap-1 text-[11px] font-medium text-blue-600 hover:text-blue-700"
             >
               View all
               <ArrowRight className="h-3 w-3" />
@@ -171,7 +223,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Quick actions */}
-        <div className="border border-slate-200 bg-white">
+        <div className="min-w-0 border border-slate-200 bg-white">
           <div className="border-b border-slate-200 px-4 py-3">
             <h2 className="text-sm font-semibold text-slate-900">
               Quick actions
@@ -256,19 +308,21 @@ function Metric({
 }) {
   return (
     <div
-      className={`flex items-center justify-between px-4 py-4 ${
+      className={`flex min-w-0 items-center justify-between px-3 py-4 sm:px-4 ${
         bordered ? "border-l border-slate-200" : ""
       }`}
     >
-      <div>
-        <p className="text-[11px] font-medium text-slate-400">{label}</p>
+      <div className="min-w-0">
+        <p className="truncate text-[10px] font-medium text-slate-400 sm:text-[11px]">
+          {label}
+        </p>
 
         <p className="mt-1 text-lg font-semibold tracking-tight text-slate-900">
           {value}
         </p>
       </div>
 
-      <Icon className="h-4 w-4 text-slate-300" />
+      <Icon className="hidden h-4 w-4 shrink-0 text-slate-300 sm:block" />
     </div>
   );
 }
@@ -277,7 +331,7 @@ function RequestRow({ request }: { request: HRRequest }) {
   return (
     <a
       href="/dashboard/admin/requests"
-      className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-slate-50"
+      className="flex min-w-0 items-center gap-3 px-4 py-3 transition-colors hover:bg-slate-50"
     >
       <div className="flex h-7 w-7 shrink-0 items-center justify-center bg-blue-50 text-blue-600">
         <FileText className="h-3.5 w-3.5" />
@@ -293,9 +347,11 @@ function RequestRow({ request }: { request: HRRequest }) {
         </p>
       </div>
 
-      <span className="text-[10px] font-medium text-amber-600">Review</span>
+      <span className="shrink-0 text-[10px] font-medium text-amber-600">
+        Review
+      </span>
 
-      <ArrowRight className="h-3 w-3 text-slate-300" />
+      <ArrowRight className="h-3 w-3 shrink-0 text-slate-300" />
     </a>
   );
 }
@@ -314,9 +370,11 @@ function QuickAction({
       href={href}
       className="flex items-center gap-3 px-3 py-3 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50"
     >
-      <Icon className="h-3.5 w-3.5 text-blue-600" />
-      <span className="flex-1">{label}</span>
-      <ArrowRight className="h-3 w-3 text-slate-300" />
+      <Icon className="h-3.5 w-3.5 shrink-0 text-blue-600" />
+
+      <span className="min-w-0 flex-1 truncate">{label}</span>
+
+      <ArrowRight className="h-3 w-3 shrink-0 text-slate-300" />
     </a>
   );
 }
@@ -337,16 +395,17 @@ function ActivityRow({
       href={href}
       className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-slate-50"
     >
-      <div className="flex h-7 w-7 items-center justify-center bg-slate-50 text-slate-500">
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center bg-slate-50 text-slate-500">
         <Icon className="h-3.5 w-3.5" />
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-medium text-slate-800">{title}</p>
-        <p className="mt-0.5 text-[11px] text-slate-400">{detail}</p>
+        <p className="truncate text-xs font-medium text-slate-800">{title}</p>
+
+        <p className="mt-0.5 truncate text-[11px] text-slate-400">{detail}</p>
       </div>
 
-      <ArrowRight className="h-3 w-3 text-slate-300" />
+      <ArrowRight className="h-3 w-3 shrink-0 text-slate-300" />
     </a>
   );
 }

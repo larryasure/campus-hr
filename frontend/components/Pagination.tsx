@@ -83,7 +83,7 @@ export default function Pagination({
   };
 
   return (
-    <div className="flex flex-col gap-3 border-t border-slate-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 border-t border-slate-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between ">
       <p className="text-xs text-slate-500">
         Showing{" "}
         <span className="font-medium text-slate-700">
@@ -99,7 +99,7 @@ export default function Pagination({
         </span>
       </p>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2 shadow-sm bg-gray-50">
         <button
           type="button"
           onClick={() =>
@@ -150,7 +150,7 @@ export default function Pagination({
             currentPage === totalPages
           }
           aria-label="Next page"
-          className="flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-40 "
         >
           <ChevronRight size={15} />
         </button>

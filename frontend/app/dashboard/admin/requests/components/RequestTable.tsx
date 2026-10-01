@@ -61,6 +61,14 @@ const getLecturer = (request: HRRequest) => {
   );
 };
 
+const formatDate = (date: string) => {
+  return new Date(date).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
 export default function RequestTable({
   requests,
   loading,
@@ -92,115 +100,199 @@ export default function RequestTable({
   }
 
   return (
-    <div className="w-full overflow-hidden">
-      <table className="w-full table-fixed text-left">
-        <thead className="border-b border-slate-200 bg-slate-50">
-          <tr>
-            <th className="w-[22%] px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Lecturer
-            </th>
+    <>
+      {/* Mobile */}
+      <div className="space-y-2.5 p-3 sm:hidden">
+        {requests.map((request) => {
+          const lecturer = getLecturer(request);
 
-            <th className="w-[25%] px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Request
-            </th>
-
-            <th className="w-[18%] px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Type
-            </th>
-
-            <th className="w-[15%] px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Status
-            </th>
-
-            <th className="w-[10%] px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Date
-            </th>
-
-            <th className="w-[10%] px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Actions
-            </th>
-          </tr>
-        </thead>
-
-        <tbody className="divide-y divide-slate-100">
-          {requests.map((request) => {
-            const lecturer = getLecturer(request);
-
-            return (
-              <tr key={request._id} className="hover:bg-slate-50">
-                <td className="max-w-0 px-3 py-3">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-slate-800">
-                      {lecturer?.fullName || "Unknown Lecturer"}
-                    </p>
-
-                    <p className="mt-0.5 truncate text-xs text-slate-400">
-                      {lecturer?.staffId || lecturer?.email || "—"}
-                    </p>
-                  </div>
-                </td>
-
-                <td className="max-w-0 px-3 py-3">
-                  <p
-                    className="truncate text-sm font-medium text-slate-800"
-                    title={request.subject}
-                  >
+          return (
+            <div
+              key={request._id}
+              className="border border-slate-200 bg-white p-3"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-slate-800">
                     {request.subject}
                   </p>
-                </td>
 
-                <td className="max-w-0 px-3 py-3">
-                  <p
-                    className="truncate text-sm text-slate-600"
-                    title={formatRequestType(request.type)}
-                  >
+                  <p className="mt-1 truncate text-xs text-slate-500">
+                    {lecturer?.fullName || "Unknown Lecturer"}
+                  </p>
+
+                  <p className="mt-0.5 truncate text-[11px] text-slate-400">
+                    {lecturer?.staffId || lecturer?.email || "—"}
+                  </p>
+                </div>
+
+                <span
+                  className={`shrink-0 rounded-md border px-2 py-1 text-[10px] font-medium ${getStatusClasses(
+                    request.status,
+                  )}`}
+                >
+                  {formatStatus(request.status)}
+                </span>
+              </div>
+
+              <div className="mt-3 grid grid-cols-2 gap-3 border-t border-slate-100 pt-3">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                    Type
+                  </p>
+
+                  <p className="mt-1 truncate text-xs text-slate-600">
                     {formatRequestType(request.type)}
                   </p>
-                </td>
+                </div>
 
-                <td className="px-3 py-3">
-                  <span
-                    className={`inline-flex max-w-full truncate whitespace-nowrap rounded-md border px-2 py-1 text-[10px] font-medium ${getStatusClasses(
-                      request.status,
-                    )}`}
-                  >
-                    {formatStatus(request.status)}
-                  </span>
-                </td>
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                    Date
+                  </p>
 
-                <td className="px-3 py-3 text-xs text-slate-500">
-                  {new Date(request.createdAt).toLocaleDateString("en-GB", {
-                    day: "2-digit",
-                    month: "short",
-                  })}
-                </td>
+                  <p className="mt-1 text-xs text-slate-600">
+                    {formatDate(request.createdAt)}
+                  </p>
+                </div>
+              </div>
 
-                <td className="px-3 py-3">
-                  <div className="flex justify-end gap-1">
-                    <button
-                      type="button"
-                      onClick={() => onView(request)}
-                      title="View request"
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-blue-600"
+              <div className="mt-3 flex gap-2 border-t border-slate-100 pt-3">
+                <button
+                  type="button"
+                  onClick={() => onView(request)}
+                  className="flex h-9 flex-1 items-center justify-center gap-2 rounded-md border border-slate-200 text-xs font-medium text-slate-600 transition hover:bg-slate-50 hover:text-blue-600"
+                >
+                  <Eye size={14} />
+                  View Request
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onDelete(request)}
+                  className="flex h-9 w-9 items-center justify-center rounded-md border border-red-200 text-red-500 transition hover:bg-red-50 hover:text-red-600"
+                  title="Delete request"
+                  aria-label="Delete request"
+                >
+                  <Trash2 size={15} />
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Tablet / Desktop */}
+      <div className="hidden w-full overflow-x-auto sm:block">
+        <table className="w-full min-w-[760px] table-fixed text-left">
+          <thead className="border-b border-slate-200 bg-slate-50">
+            <tr>
+              <th className="w-[22%] px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Lecturer
+              </th>
+
+              <th className="w-[25%] px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Request
+              </th>
+
+              <th className="w-[18%] px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Type
+              </th>
+
+              <th className="w-[15%] px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Status
+              </th>
+
+              <th className="w-[10%] px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Date
+              </th>
+
+              <th className="w-[10%] px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Actions
+              </th>
+            </tr>
+          </thead>
+
+          <tbody className="divide-y divide-slate-100">
+            {requests.map((request) => {
+              const lecturer = getLecturer(request);
+
+              return (
+                <tr key={request._id} className="hover:bg-slate-50">
+                  <td className="max-w-0 px-3 py-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-slate-800">
+                        {lecturer?.fullName || "Unknown Lecturer"}
+                      </p>
+
+                      <p className="mt-0.5 truncate text-xs text-slate-400">
+                        {lecturer?.staffId || lecturer?.email || "—"}
+                      </p>
+                    </div>
+                  </td>
+
+                  <td className="max-w-0 px-3 py-3">
+                    <p
+                      className="truncate text-sm font-medium text-slate-800"
+                      title={request.subject}
                     >
-                      <Eye size={15} />
-                    </button>
+                      {request.subject}
+                    </p>
+                  </td>
 
-                    <button
-                      type="button"
-                      onClick={() => onDelete(request)}
-                      title="Delete request"
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-red-200 text-red-500 transition hover:bg-red-50 hover:text-red-600"
+                  <td className="max-w-0 px-3 py-3">
+                    <p
+                      className="truncate text-sm text-slate-600"
+                      title={formatRequestType(request.type)}
                     >
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+                      {formatRequestType(request.type)}
+                    </p>
+                  </td>
+
+                  <td className="px-3 py-3">
+                    <span
+                      className={`inline-flex max-w-full truncate whitespace-nowrap rounded-md border px-2 py-1 text-[10px] font-medium ${getStatusClasses(
+                        request.status,
+                      )}`}
+                    >
+                      {formatStatus(request.status)}
+                    </span>
+                  </td>
+
+                  <td className="px-3 py-3 text-xs text-slate-500">
+                    {new Date(request.createdAt).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                    })}
+                  </td>
+
+                  <td className="px-3 py-3">
+                    <div className="flex justify-end gap-1">
+                      <button
+                        type="button"
+                        onClick={() => onView(request)}
+                        title="View request"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-blue-600"
+                      >
+                        <Eye size={15} />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => onDelete(request)}
+                        title="Delete request"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-red-200 text-red-500 transition hover:bg-red-50 hover:text-red-600"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }

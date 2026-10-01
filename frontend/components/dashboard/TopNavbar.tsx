@@ -7,6 +7,7 @@ import {
   Bell,
   ChevronDown,
   LogOut,
+  Menu,
   User,
 } from "lucide-react";
 
@@ -16,6 +17,7 @@ import Modal from "@/components/ui/Modal";
 
 interface TopNavbarProps {
   isAdmin: boolean;
+  onMobileMenuOpen?: () => void;
 }
 
 interface RequestItem {
@@ -32,13 +34,17 @@ interface RequestsResponse {
 
 export default function TopNavbar({
   isAdmin,
+  onMobileMenuOpen,
 }: TopNavbarProps) {
   const router = useRouter();
   const { user, logout } = useAuthStore();
 
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] =
+    useState(false);
+
   const [isNotificationsOpen, setIsNotificationsOpen] =
     useState(false);
+
   const [isLogoutModalOpen, setIsLogoutModalOpen] =
     useState(false);
 
@@ -88,7 +94,10 @@ export default function TopNavbar({
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener(
+      "mousedown",
+      handleClickOutside,
+    );
 
     return () => {
       document.removeEventListener(
@@ -117,27 +126,41 @@ export default function TopNavbar({
 
   const handleConfirmLogout = () => {
     logout();
+    setIsLogoutModalOpen(false);
     router.replace("/login");
   };
 
   return (
     <>
-      <header className="relative z-30 flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6 lg:px-8">
-        {/* Context */}
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-slate-900">
-            {isAdmin ? "HR Administration" : "Lecturer Portal"}
-          </p>
+      <header className="relative z-30 flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-3 sm:px-6 lg:px-8">
+        {/* Mobile menu + context */}
+        <div className="flex min-w-0 items-center gap-2.5">
+          <button
+            type="button"
+            onClick={onMobileMenuOpen}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-slate-200 text-slate-600 transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 lg:hidden"
+            aria-label="Open navigation menu"
+          >
+            <Menu className="h-4 w-4" />
+          </button>
 
-          <p className="hidden truncate text-xs text-slate-500 sm:block">
-            {isAdmin
-              ? "Manage staff records and HR operations"
-              : "Manage your academic and HR activities"}
-          </p>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-slate-900">
+              {isAdmin
+                ? "HR Administration"
+                : "Lecturer Portal"}
+            </p>
+
+            <p className="hidden truncate text-xs text-slate-500 sm:block">
+              {isAdmin
+                ? "Manage staff records and HR operations"
+                : "Manage your academic and HR activities"}
+            </p>
+          </div>
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           {/* Notifications */}
           <div
             ref={notificationsRef}
@@ -151,6 +174,7 @@ export default function TopNavbar({
                 setIsNotificationsOpen(
                   (current) => !current,
                 );
+
                 setIsProfileOpen(false);
               }}
               className="relative flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 text-slate-500 transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
@@ -167,7 +191,7 @@ export default function TopNavbar({
             </button>
 
             {isNotificationsOpen && (
-              <div className="absolute right-0 mt-2 w-[320px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg">
+              <div className="absolute right-0 mt-2 w-[320px] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg">
                 <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
                   <div>
                     <p className="text-sm font-semibold text-slate-900">
@@ -256,6 +280,7 @@ export default function TopNavbar({
                 setIsProfileOpen(
                   (current) => !current,
                 );
+
                 setIsNotificationsOpen(false);
               }}
               className="flex items-center gap-2 rounded-md px-1.5 py-1 transition-colors hover:bg-slate-50"
@@ -287,7 +312,9 @@ export default function TopNavbar({
               <div className="absolute right-0 mt-2 w-52 overflow-hidden rounded-lg border border-slate-200 bg-white p-1.5 shadow-lg">
                 <Link
                   href="/dashboard/profile"
-                  onClick={() => setIsProfileOpen(false)}
+                  onClick={() =>
+                    setIsProfileOpen(false)
+                  }
                   className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-blue-50 hover:text-blue-700"
                 >
                   <User className="h-4 w-4" />
@@ -313,10 +340,11 @@ export default function TopNavbar({
         </div>
       </header>
 
-      {/* Logout Confirmation */}
       <Modal
         isOpen={isLogoutModalOpen}
-        onClose={() => setIsLogoutModalOpen(false)}
+        onClose={() =>
+          setIsLogoutModalOpen(false)
+        }
         title="Confirm logout"
         description="Are you sure you want to log out of your CampusHR account?"
         size="sm"
@@ -324,7 +352,9 @@ export default function TopNavbar({
         <div className="flex justify-end gap-2">
           <button
             type="button"
-            onClick={() => setIsLogoutModalOpen(false)}
+            onClick={() =>
+              setIsLogoutModalOpen(false)
+            }
             className="rounded-md border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
           >
             Cancel
@@ -333,7 +363,7 @@ export default function TopNavbar({
           <button
             type="button"
             onClick={handleConfirmLogout}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+            className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
           >
             Logout
           </button>

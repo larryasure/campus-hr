@@ -1,18 +1,24 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Poppins } from "next/font/google";
 
 import "./globals.css";
-import Providers from "./providers";
 
-const inter = Inter({
+const poppins = Poppins({
   subsets: ["latin"],
+  weight: [
+    "400",
+    "500",
+    "600",
+    "700",
+  ],
+  variable: "--font-poppins",
   display: "swap",
-  variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
-  title: "CampusHR",
-  description: "University Lecturer HR Management System",
+  title: "University HR Management System",
+  description:
+    "University Lecturer Human Resources Management System",
 };
 
 export default function RootLayout({
@@ -21,9 +27,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body suppressHydrationWarning={true}>
-        <Providers>{children}</Providers>
+    <html
+      lang="en"
+      className={poppins.variable}
+    >
+      <body
+      suppressHydrationWarning={true}
+       className="font-sans antialiased">
+        {children}
       </body>
     </html>
   );

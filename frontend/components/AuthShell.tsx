@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+
 import AuthVisual from "@/components/AuthVisual";
 
 interface AuthShellProps {
@@ -15,7 +16,7 @@ export default function AuthShell({
 }: AuthShellProps) {
   return (
     <main className="min-h-screen bg-[#f3f4f6]">
-      <div className="mx-auto min-h-screen max-w-[1500px] ">
+      <div className="mx-auto min-h-screen max-w-[1500px]">
         <div className="grid min-h-screen lg:grid-cols-[1.15fr_0.85fr]">
           {/* Visual side */}
           <section className="relative hidden min-h-screen overflow-hidden lg:block">
@@ -41,9 +42,32 @@ export default function AuthShell({
             </div>
           </section>
 
-          {/* Authentication side */}
-          <section className="flex min-h-screen items-center justify-center px-4 py-6 sm:px-6 lg:px-8">
-            <div className="flex w-full max-w-[500px] flex-col bg-white p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)] sm:p-8 rounded-xl">
+          <section className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-6 sm:px-6 lg:px-8">
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-cover bg-center opacity-100 lg:hidden"
+              style={{
+                backgroundImage: "url('/bg-mobile.jpg')",
+                backgroundPosition: "center 65%",
+              }}
+            />
+
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 scale-105 bg-cover bg-center blur-[3px] lg:hidden"
+              style={{
+                backgroundImage: "url('/bg-mobile.jpg')",
+                backgroundPosition: "center 65%",
+              }}
+            />
+
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-slate-950/45 lg:hidden"
+            />
+
+            {/* Authentication card */}
+            <div className="relative z-10 flex w-full max-w-[500px] flex-col rounded-xl bg-white p-6 shadow-[0_18px_55px_rgba(15,23,42,0.16)] sm:p-8 lg:shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
               {/* Mobile brand */}
               <div className="mb-8 flex items-center lg:hidden">
                 <Link href="/" className="flex items-center gap-3">
@@ -57,9 +81,7 @@ export default function AuthShell({
                 </Link>
               </div>
 
-              <div className="mb-7 ">
-         
-
+              <div className="mb-7">
                 <h1 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-slate-950 sm:text-2xl">
                   {title}
                 </h1>

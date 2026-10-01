@@ -18,7 +18,7 @@ export default function WorkloadTable({
   if (loading) {
     return (
       <div className="px-4 py-10 text-center">
-        <p className="text-xs text-slate-500">Loading workload records...</p>
+        <p className="text-sm text-slate-500">Loading workload records...</p>
       </div>
     );
   }
@@ -44,31 +44,31 @@ export default function WorkloadTable({
       <table className="w-full min-w-[850px] text-left">
         <thead className="border-b border-slate-200 bg-slate-50">
           <tr>
-            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+            <th className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
               Lecturer
             </th>
 
-            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+            <th className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
               Course
             </th>
 
-            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+            <th className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
               Department
             </th>
 
-            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+            <th className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
               Semester
             </th>
 
-            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+            <th className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
               Session
             </th>
 
-            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+            <th className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
               Hours
             </th>
 
-            <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+            <th className="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
               Action
             </th>
           </tr>
@@ -77,20 +77,18 @@ export default function WorkloadTable({
         <tbody className="divide-y divide-slate-100">
           {workload.map((item) => (
             <tr key={item._id} className="transition hover:bg-slate-50">
-              {/* Lecturer */}
               <td className="px-4 py-3">
                 <div>
-                  <p className="text-xs font-medium text-slate-800">
+                  <p className="text-sm font-medium text-slate-800">
                     {item.lecturer?.fullName || "Unknown Lecturer"}
                   </p>
 
-                  <p className="mt-0.5 text-[11px] text-slate-400">
+                  <p className="mt-0.5 text-xs text-slate-400">
                     {item.lecturer?.staffId || "—"}
                   </p>
                 </div>
               </td>
 
-              {/* Course */}
               <td className="px-4 py-3">
                 <div className="flex items-start gap-2">
                   <BookOpen
@@ -99,46 +97,41 @@ export default function WorkloadTable({
                   />
 
                   <div>
-                    <p className="text-xs font-medium text-slate-800">
+                    <p className="text-sm font-medium text-slate-800">
                       {item.courseCode}
                     </p>
 
-                    <p className="mt-0.5 max-w-[220px] truncate text-[11px] text-slate-500">
+                    <p className="mt-0.5 max-w-[220px] truncate text-xs text-slate-500">
                       {item.courseTitle}
                     </p>
                   </div>
                 </div>
               </td>
 
-              {/* Department */}
-              <td className="px-4 py-3 text-xs text-slate-600">
+              <td className="px-4 py-3 text-sm text-slate-600">
                 {item.department || "—"}
               </td>
 
-              {/* Semester */}
               <td className="px-4 py-3">
-                <span className="inline-flex rounded-md bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-600">
+                <span className="inline-flex rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600">
                   {item.semester === "FIRST" ? "First" : "Second"}
                 </span>
               </td>
 
-              {/* Academic Session */}
-              <td className="px-4 py-3 text-xs text-slate-600">
+              <td className="px-4 py-3 text-sm text-slate-600">
                 {item.academicSession || "—"}
               </td>
 
-              {/* Hours */}
               <td className="px-4 py-3">
                 <div className="flex items-center gap-1.5">
-                  <Clock3 size={13} className="text-slate-400" />
+                  <Clock3 size={14} className="text-slate-400" />
 
-                  <span className="text-xs font-medium text-slate-700">
+                  <span className="text-sm font-medium text-slate-700">
                     {item.weeklyTeachingHours}h
                   </span>
                 </div>
               </td>
 
-              {/* Action */}
               <td className="px-4 py-3 text-right">
                 <button
                   type="button"

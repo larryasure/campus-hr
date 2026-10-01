@@ -1,4 +1,6 @@
 import { BriefcaseBusiness, Mail, UserRound } from "lucide-react";
+import Image from "next/image";
+
 import type { User } from "@/types";
 
 interface ProfileSummaryProps {
@@ -18,32 +20,34 @@ export default function ProfileSummary({
     .toUpperCase();
 
   return (
-    <section className="border border-slate-200 bg-white">
+    <section className="min-w-0 max-w-full overflow-hidden border border-slate-200 bg-white">
       <div className="border-b border-slate-200 px-4 py-3">
         <h2 className="text-sm font-semibold text-slate-900">
           Profile Summary
         </h2>
 
-        <p className="mt-0.5 text-xs text-slate-500">
+        <p className="mt-0.5 wrap-break-word text-xs text-slate-500">
           Your current employment information
         </p>
       </div>
 
-      <div className="p-4">
-        <div className="flex items-center gap-3">
+      <div className="min-w-0 p-4">
+        <div className="flex min-w-0 items-center gap-3">
           {profile.profilePhoto ? (
-            <img
+            <Image
               src={profile.profilePhoto}
               alt={profile.fullName}
-              className="h-11 w-11 rounded-full object-cover"
+              width={44}
+              height={44}
+              className="h-11 w-11 shrink-0 rounded-full object-cover"
             />
           ) : (
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-50 text-sm font-semibold text-blue-700">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-50 text-sm font-semibold text-blue-700">
               {initials}
             </div>
           )}
 
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-slate-900">
               {profile.fullName}
             </p>
@@ -54,37 +58,39 @@ export default function ProfileSummary({
           </div>
         </div>
 
-        <div className="mt-4 space-y-3">
-          <div className="flex items-start gap-3">
+        <div className="mt-4 min-w-0 space-y-3">
+          <div className="flex min-w-0 items-start gap-3">
             <Mail className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
 
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
                 Email
               </p>
 
-              <p className="truncate text-xs text-slate-700">{profile.email}</p>
+              <p className="break-all text-xs text-slate-700">
+                {profile.email}
+              </p>
             </div>
           </div>
 
-          <div className="flex items-start gap-3">
+          <div className="flex min-w-0 items-start gap-3">
             <BriefcaseBusiness className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
 
-            <div>
+            <div className="min-w-0 flex-1">
               <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
                 Department
               </p>
 
-              <p className="text-xs text-slate-700">
+              <p className="wrap-break-word text-xs leading-5 text-slate-700">
                 {profile.department || "Not specified"}
               </p>
             </div>
           </div>
 
-          <div className="flex items-start gap-3">
+          <div className="flex min-w-0 items-start gap-3">
             <UserRound className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
 
-            <div>
+            <div className="min-w-0 flex-1">
               <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
                 Years of Service
               </p>
