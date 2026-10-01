@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import HRRequest from "../models/HRRequest.js";
 import { AuthRequest } from "../middleware/authMiddleware.js";
 import {
