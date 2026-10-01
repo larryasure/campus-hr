@@ -1,8 +1,11 @@
 import { Router } from "express";
+
 import {
   getAllRequests,
   updateRequest,
+  deleteRequest,
 } from "../controllers/adminRequestController.js";
+
 import {
   protect,
   authorizeRoles,
@@ -10,18 +13,24 @@ import {
 
 const router = Router();
 
-router.get(
-  "/",
+router.use(
   protect,
   authorizeRoles("HR_ADMIN"),
-  getAllRequests
+);
+
+router.get(
+  "/",
+  getAllRequests,
 );
 
 router.patch(
   "/:id",
-  protect,
-  authorizeRoles("HR_ADMIN"),
-  updateRequest
+  updateRequest,
+);
+
+router.delete(
+  "/:id",
+  deleteRequest,
 );
 
 export default router;

@@ -1,19 +1,16 @@
 import { Response } from "express";
-import HRRequest from "../models/HRRequest.js";
-import { AuthRequest } from "../middleware/authMiddleware.js";
-import {
-  getPagination,
-  getPaginationMeta,
-} from "../utils/pagination.js";
 
-export const getAllRequests = async (
-  req: AuthRequest,
-  res: Response
-) => {
+import HRRequest from "../models/HRRequest.js";
+
+import { AuthRequest } from "../middleware/authMiddleware.js";
+
+import { getPagination, getPaginationMeta } from "../utils/pagination.js";
+
+export const getAllRequests = async (req: AuthRequest, res: Response) => {
   try {
     const { page, limit, skip } = getPagination(
       req.query.page as string,
-      req.query.limit as string
+      req.query.limit as string,
     );
 
     const filter: Record<string, unknown> = {};
@@ -30,7 +27,7 @@ export const getAllRequests = async (
       HRRequest.find(filter)
         .populate(
           "lecturer",
-          "staffId fullName email faculty department academicRank"
+          "staffId fullName email faculty department academicRank",
         )
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -54,19 +51,11 @@ export const getAllRequests = async (
   }
 };
 
-export const updateRequest = async (
-  req: AuthRequest,
-  res: Response
-) => {
+export const updateRequest = async (req: AuthRequest, res: Response) => {
   try {
     const { status, adminComment } = req.body;
 
-    const validStatuses = [
-      "PENDING",
-      "UNDER_REVIEW",
-      "APPROVED",
-      "REJECTED",
-    ];
+    const validStatuses = ["PENDING", "UNDER_REVIEW", "APPROVED", "REJECTED"];
 
     if (status && !validStatuses.includes(status)) {
       return res.status(400).json({
@@ -96,7 +85,7 @@ export const updateRequest = async (
 
     const updatedRequest = await HRRequest.findById(request._id).populate(
       "lecturer",
-      "staffId fullName email faculty department academicRank"
+      "staffId fullName email faculty department academicRank",
     );
 
     return res.status(200).json({
@@ -110,6 +99,33 @@ export const updateRequest = async (
     return res.status(500).json({
       success: false,
       message: "Server error while updating HR request",
+    });
+  }
+};
+
+export const deleteRequest = async (req: AuthRequest, res: Response) => {
+  try {
+    const request = await HRRequest.findById(req.params.id);
+
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: "HR request not found",
+      });
+    }
+
+    await HRRequest.findByIdAndDelete(req.params.id);
+
+    return res.status(200).json({
+      success: true,
+      message: "HR request deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete request error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error while deleting HR request",
     });
   }
 };
