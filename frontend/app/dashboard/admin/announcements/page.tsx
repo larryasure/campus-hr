@@ -5,6 +5,7 @@ import { Megaphone, Plus, Send, Trash2 } from "lucide-react";
 
 import PageHeader from "@/components/dashboard/PageHeader";
 import Modal from "@/components/ui/Modal";
+import Pagination from "@/components/Pagination";
 
 import AnnouncementForm from "./components/AnnouncementForm";
 import AnnouncementModal from "./components/AnnouncementModal";
@@ -24,12 +25,23 @@ import type { Announcement } from "@/types";
 
 type ActionType = "PUBLISH" | "DELETE";
 
+const PAGE_SIZE = 10;
+
 export default function AdminAnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
   const [loading, setLoading] = useState(true);
 
   const [pageError, setPageError] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    pageSize: PAGE_SIZE,
+  });
 
   const [formOpen, setFormOpen] = useState(false);
 
@@ -54,14 +66,15 @@ export default function AdminAnnouncementsPage() {
 
   const [actionError, setActionError] = useState("");
 
-  const loadAnnouncements = useCallback(async () => {
+  const loadAnnouncements = useCallback(async (page: number) => {
     try {
       setLoading(true);
       setPageError("");
 
-      const data = await getAdminAnnouncements();
+      const response = await getAdminAnnouncements(page, PAGE_SIZE);
 
-      setAnnouncements(data);
+      setAnnouncements(response.announcements);
+      setPagination(response.pagination);
     } catch (error) {
       console.error("Failed to load announcements:", error);
 
@@ -72,8 +85,8 @@ export default function AdminAnnouncementsPage() {
   }, []);
 
   useEffect(() => {
-    loadAnnouncements();
-  }, [loadAnnouncements]);
+    loadAnnouncements(currentPage);
+  }, [currentPage, loadAnnouncements]);
 
   const handleOpenCreate = () => {
     setEditingAnnouncement(null);
@@ -122,7 +135,7 @@ export default function AdminAnnouncementsPage() {
       setFormOpen(false);
       setEditingAnnouncement(null);
 
-      await loadAnnouncements();
+      await loadAnnouncements(currentPage);
     } catch (error) {
       console.error("Failed to save announcement:", error);
 
@@ -164,7 +177,7 @@ export default function AdminAnnouncementsPage() {
       setSelectedAnnouncement(null);
       setScheduledAt("");
 
-      await loadAnnouncements();
+      await loadAnnouncements(currentPage);
     } catch (error) {
       console.error("Failed to schedule announcement:", error);
 
@@ -187,7 +200,7 @@ export default function AdminAnnouncementsPage() {
 
       setSelectedAnnouncement(null);
 
-      await loadAnnouncements();
+      await loadAnnouncements(currentPage);
     } catch (error) {
       console.error("Failed to cancel announcement schedule:", error);
 
@@ -239,7 +252,7 @@ export default function AdminAnnouncementsPage() {
       setActionType(null);
       setActionAnnouncement(null);
 
-      await loadAnnouncements();
+      await loadAnnouncements(currentPage);
     } catch (error) {
       console.error("Failed to perform announcement action:", error);
 
@@ -314,18 +327,13 @@ export default function AdminAnnouncementsPage() {
           onDelete={handleRequestDelete}
         />
 
-        {!loading && announcements.length > 0 && (
-          <div className="border-t border-slate-200 px-4 py-3">
-            <p className="text-xs text-slate-500">
-              Showing{" "}
-              <span className="font-medium text-slate-700">
-                {announcements.length}
-              </span>{" "}
-              announcement
-              {announcements.length === 1 ? "" : "s"}
-            </p>
-          </div>
-        )}
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          totalItems={pagination.totalItems}
+          pageSize={pagination.pageSize}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
       <Modal

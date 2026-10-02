@@ -4,10 +4,7 @@ import User from "../models/User.js";
 import { AuthRequest } from "../middleware/authMiddleware.js";
 import { sendAnnouncementEmail } from "../services/emailService.js";
 
-export const createAnnouncement = async (
-  req: AuthRequest,
-  res: Response,
-) => {
+export const createAnnouncement = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -47,20 +44,38 @@ export const createAnnouncement = async (
   }
 };
 
-export const getAnnouncements = async (
-  req: AuthRequest,
-  res: Response,
-) => {
+export const getAnnouncements = async (req: AuthRequest, res: Response) => {
   try {
-    const announcements = await Announcement.find({
-      status: "PUBLISHED",
-    })
-      .sort({ publishedAt: -1 })
-      .populate("createdBy", "fullName");
+    const page = Math.max(Number(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 100);
+
+    const skip = (page - 1) * limit;
+
+    const [announcements, totalItems] = await Promise.all([
+      Announcement.find({
+        status: "PUBLISHED",
+      })
+        .sort({ publishedAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate("createdBy", "fullName"),
+
+      Announcement.countDocuments({
+        status: "PUBLISHED",
+      }),
+    ]);
+
+    const totalPages = Math.ceil(totalItems / limit);
 
     return res.status(200).json({
       success: true,
       data: announcements,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems,
+        pageSize: limit,
+      },
     });
   } catch (error) {
     console.error("Get announcements error:", error);
@@ -71,19 +86,37 @@ export const getAnnouncements = async (
     });
   }
 };
-
 export const getAdminAnnouncements = async (
   req: AuthRequest,
   res: Response,
 ) => {
   try {
-    const announcements = await Announcement.find()
-      .sort({ createdAt: -1 })
-      .populate("createdBy", "fullName");
+    const page = Math.max(Number(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 100);
+
+    const skip = (page - 1) * limit;
+
+    const [announcements, totalItems] = await Promise.all([
+      Announcement.find()
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate("createdBy", "fullName"),
+
+      Announcement.countDocuments(),
+    ]);
+
+    const totalPages = Math.ceil(totalItems / limit);
 
     return res.status(200).json({
       success: true,
       data: announcements,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems,
+        pageSize: limit,
+      },
     });
   } catch (error) {
     console.error("Get admin announcements error:", error);
@@ -95,10 +128,7 @@ export const getAdminAnnouncements = async (
   }
 };
 
-export const updateAnnouncement = async (
-  req: AuthRequest,
-  res: Response,
-) => {
+export const updateAnnouncement = async (req: AuthRequest, res: Response) => {
   try {
     const { title, content } = req.body;
 
@@ -157,10 +187,7 @@ export const updateAnnouncement = async (
   }
 };
 
-export const scheduleAnnouncement = async (
-  req: AuthRequest,
-  res: Response,
-) => {
+export const scheduleAnnouncement = async (req: AuthRequest, res: Response) => {
   try {
     const { scheduledAt } = req.body;
 
@@ -264,10 +291,7 @@ export const cancelScheduledAnnouncement = async (
   }
 };
 
-export const publishAnnouncement = async (
-  req: AuthRequest,
-  res: Response,
-) => {
+export const publishAnnouncement = async (req: AuthRequest, res: Response) => {
   try {
     const announcement = await Announcement.findById(req.params.id);
 
@@ -341,14 +365,9 @@ export const publishAnnouncement = async (
   }
 };
 
-export const deleteAnnouncement = async (
-  req: AuthRequest,
-  res: Response,
-) => {
+export const deleteAnnouncement = async (req: AuthRequest, res: Response) => {
   try {
-    const announcement = await Announcement.findByIdAndDelete(
-      req.params.id,
-    );
+    const announcement = await Announcement.findByIdAndDelete(req.params.id);
 
     if (!announcement) {
       return res.status(404).json({

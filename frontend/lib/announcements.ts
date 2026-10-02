@@ -16,16 +16,39 @@ export interface ScheduleAnnouncementData {
   scheduledAt: string;
 }
 
+export interface AnnouncementPagination {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  pageSize: number;
+}
+
+export interface PaginatedAnnouncementsResponse {
+  announcements: Announcement[];
+  pagination: AnnouncementPagination;
+}
+
 export const getAnnouncements = async (): Promise<Announcement[]> => {
   const response = await api.get("/announcements");
 
   return response.data.data;
 };
 
-export const getAdminAnnouncements = async (): Promise<Announcement[]> => {
-  const response = await api.get("/announcements/admin");
+export const getAdminAnnouncements = async (
+  page = 1,
+  limit = 10,
+): Promise<PaginatedAnnouncementsResponse> => {
+  const response = await api.get("/announcements/admin", {
+    params: {
+      page,
+      limit,
+    },
+  });
 
-  return response.data.data;
+  return {
+    announcements: response.data.data,
+    pagination: response.data.pagination,
+  };
 };
 
 export const createAnnouncement = async (data: CreateAnnouncementData) => {

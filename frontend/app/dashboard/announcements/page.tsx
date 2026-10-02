@@ -6,22 +6,53 @@ import { AlertCircle, Bell, Loader2, Megaphone } from "lucide-react";
 import api from "@/lib/api";
 import type { Announcement } from "@/types";
 
+import Pagination from "@/components/Pagination";
 import AnnouncementList from "./components/AnnouncementList";
+
+interface AnnouncementPagination {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  pageSize: number;
+}
+
+const PAGE_SIZE = 10;
 
 export default function AnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
+  const [pagination, setPagination] = useState<AnnouncementPagination>({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    pageSize: PAGE_SIZE,
+  });
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const loadAnnouncements = async () => {
+  const loadAnnouncements = async (page: number) => {
     try {
       setLoading(true);
       setError("");
 
-      const response = await api.get("/announcements");
+      const response = await api.get("/announcements", {
+        params: {
+          page,
+          limit: PAGE_SIZE,
+        },
+      });
 
       setAnnouncements(response.data.data ?? []);
+
+      setPagination(
+        response.data.pagination ?? {
+          currentPage: page,
+          totalPages: 1,
+          totalItems: 0,
+          pageSize: PAGE_SIZE,
+        },
+      );
     } catch (err) {
       console.error("Failed to load announcements:", err);
 
@@ -32,8 +63,8 @@ export default function AnnouncementsPage() {
   };
 
   useEffect(() => {
-    loadAnnouncements();
-  }, []);
+    loadAnnouncements(pagination.currentPage);
+  }, [pagination.currentPage]);
 
   if (loading) {
     return (
@@ -48,10 +79,7 @@ export default function AnnouncementsPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-5">
-      {/* Header */}
       <div>
-     
-
         <h1 className="mt-1 text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">
           Announcements
         </h1>
@@ -62,7 +90,6 @@ export default function AnnouncementsPage() {
         </p>
       </div>
 
-      {/* Error */}
       {error && (
         <div
           role="alert"
@@ -74,7 +101,6 @@ export default function AnnouncementsPage() {
         </div>
       )}
 
-      {/* Summary */}
       <div className="border border-slate-200 bg-white p-4">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-md bg-blue-50">
@@ -87,7 +113,7 @@ export default function AnnouncementsPage() {
             </p>
 
             <p className="mt-0.5 text-lg font-semibold text-slate-900">
-              {announcements.length}
+              {pagination.totalItems}
             </p>
           </div>
 
@@ -98,7 +124,6 @@ export default function AnnouncementsPage() {
         </div>
       </div>
 
-      {/* Announcements */}
       <section>
         <div className="mb-3">
           <h2 className="text-sm font-semibold text-slate-900">
@@ -111,6 +136,19 @@ export default function AnnouncementsPage() {
         </div>
 
         <AnnouncementList announcements={announcements} />
+
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          totalItems={pagination.totalItems}
+          pageSize={pagination.pageSize}
+          onPageChange={(page) => {
+            setPagination((current) => ({
+              ...current,
+              currentPage: page,
+            }));
+          }}
+        />
       </section>
     </div>
   );
