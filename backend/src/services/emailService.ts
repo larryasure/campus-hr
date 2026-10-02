@@ -9,7 +9,9 @@ const emailEnabled = Boolean(emailUser && emailPassword);
 
 const transporter = emailEnabled
   ? nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
       auth: {
         user: emailUser,
         pass: emailPassword,
@@ -45,7 +47,10 @@ const emailTemplate = (content: string) => `
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
   <title>CampusHR</title>
 </head>
 
@@ -174,9 +179,9 @@ export const sendRegistrationEmail = async (
     "Welcome to CampusHR",
     `
       <h2 style="
-        margin: 0 0 12px;
+        margin: 0 0 10px;
         color: #0f172a;
-        font-size: 20px;
+        font-size: 18px;
       ">
         Welcome to CampusHR, ${fullName}
       </h2>
@@ -186,8 +191,8 @@ export const sendRegistrationEmail = async (
       </p>
 
       <div style="
-        margin: 20px 0;
-        padding: 16px;
+        margin: 18px 0;
+        padding: 14px;
         background: #f8fafc;
         border: 1px solid #e2e8f0;
         border-radius: 6px;
