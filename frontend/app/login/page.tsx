@@ -1,17 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ArrowRight,
-  Eye,
-  EyeOff,
-  Loader2,
-} from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import AuthShell from "@/components/AuthShell";
 import api from "@/lib/api";
+import { useAuthStore } from "@/stores/authStore";
 
 interface LoginResponse {
   success: boolean;
@@ -28,15 +24,14 @@ interface LoginResponse {
 
 export default function LoginPage() {
   const router = useRouter();
+  const { setAuth } = useAuthStore();
 
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const handleSubmit = async (
-    event: FormEvent<HTMLFormElement>,
-  ) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     setError("");
@@ -45,13 +40,9 @@ export default function LoginPage() {
 
     const formData = new FormData(event.currentTarget);
 
-    const email = String(
-      formData.get("email") || "",
-    ).trim();
+    const email = String(formData.get("email") || "").trim();
 
-    const password = String(
-      formData.get("password") || "",
-    );
+    const password = String(formData.get("password") || "");
 
     if (!email || !password) {
       setError("Email and password are required.");
@@ -60,37 +51,28 @@ export default function LoginPage() {
     }
 
     try {
-      const response = await api.post<LoginResponse>(
-        "/auth/login",
-        {
-          email,
-          password,
-        },
-      );
+      const response = await api.post<LoginResponse>("/auth/login", {
+        email,
+        password,
+      });
 
       const data = response.data;
 
       if (!data.success) {
-        setError(
-          data.message || "Unable to sign in.",
-        );
+        setError(data.message || "Unable to sign in.");
+        setIsLoading(false);
         return;
       }
 
-      localStorage.setItem(
-        "campushr-auth",
-        JSON.stringify({
-          state: {
-            token: data.token,
-            user: data.user,
-          },
-        }),
-      );
+      // Update Zustand immediately.
+      // This also persists the authentication state
+      // through the Zustand persist middleware.
+      setAuth(data.token, data.user);
 
-      setSuccess(
-        data.message || "Login successful.",
-      );
+      setSuccess(data.message || "Login successful.");
 
+      // Keep the success message visible briefly
+      // before navigating to the dashboard.
       setTimeout(() => {
         if (data.user.role === "HR_ADMIN") {
           router.push("/dashboard/admin");
@@ -99,11 +81,7 @@ export default function LoginPage() {
         }
       }, 1500);
     } catch (error: unknown) {
-      if (
-        error &&
-        typeof error === "object" &&
-        "response" in error
-      ) {
+      if (error && typeof error === "object" && "response" in error) {
         const axiosError = error as {
           response?: {
             data?: {
@@ -113,13 +91,10 @@ export default function LoginPage() {
         };
 
         setError(
-          axiosError.response?.data?.message ||
-            "Invalid email or password.",
+          axiosError.response?.data?.message || "Invalid email or password.",
         );
       } else {
-        setError(
-          "Unable to connect to the server. Please try again.",
-        );
+        setError("Unable to connect to the server. Please try again.");
       }
     } finally {
       setIsLoading(false);
@@ -131,10 +106,7 @@ export default function LoginPage() {
       title="Welcome back"
       subtitle="Sign in to your CampusHR workspace."
     >
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-4"
-      >
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label
             htmlFor="email"
@@ -168,11 +140,7 @@ export default function LoginPage() {
             <input
               id="password"
               name="password"
-              type={
-                showPassword
-                  ? "text"
-                  : "password"
-              }
+              type={showPassword ? "text" : "password"}
               autoComplete="current-password"
               placeholder="Enter your password"
               required
@@ -181,28 +149,14 @@ export default function LoginPage() {
 
             <button
               type="button"
-              aria-label={
-                showPassword
-                  ? "Hide password"
-                  : "Show password"
-              }
-              onClick={() =>
-                setShowPassword(
-                  (current) => !current,
-                )
-              }
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              onClick={() => setShowPassword((current) => !current)}
               className="absolute right-0 top-0 flex h-10 w-10 items-center justify-center text-slate-400 transition hover:text-slate-700"
             >
               {showPassword ? (
-                <EyeOff
-                  size={15}
-                  strokeWidth={1.8}
-                />
+                <EyeOff size={15} strokeWidth={1.8} />
               ) : (
-                <Eye
-                  size={15}
-                  strokeWidth={1.8}
-                />
+                <Eye size={15} strokeWidth={1.8} />
               )}
             </button>
           </div>
@@ -242,10 +196,7 @@ export default function LoginPage() {
         >
           {isLoading ? (
             <>
-              <Loader2
-                size={14}
-                className="animate-spin"
-              />
+              <Loader2 size={14} className="animate-spin" />
               Signing in...
             </>
           ) : (
@@ -260,9 +211,7 @@ export default function LoginPage() {
       <div className="my-5 flex items-center gap-3">
         <div className="h-px flex-1 bg-slate-100" />
 
-        <span className="text-[10px] font-medium text-slate-400">
-          OR
-        </span>
+        <span className="text-[10px] font-medium text-slate-400">OR</span>
 
         <div className="h-px flex-1 bg-slate-100" />
       </div>
