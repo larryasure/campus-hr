@@ -1,12 +1,13 @@
-import { Resend } from "resend";
+import { BrevoClient } from "@getbrevo/brevo";
 
-const resendApiKey = process.env.RESEND_API_KEY;
+const brevoApiKey = process.env.BREVO_API_KEY;
 const emailFrom = process.env.EMAIL_FROM;
-const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+const frontendUrl =
+  process.env.FRONTEND_URL || "http://localhost:3000";
 
-if (!resendApiKey) {
+if (!brevoApiKey) {
   console.warn(
-    "RESEND_API_KEY is not configured. Email notifications are disabled.",
+    "BREVO_API_KEY is not configured. Email notifications are disabled.",
   );
 }
 
@@ -16,7 +17,11 @@ if (!emailFrom) {
   );
 }
 
-const resend = resendApiKey && emailFrom ? new Resend(resendApiKey) : null;
+const brevo = brevoApiKey
+  ? new BrevoClient({
+      apiKey: brevoApiKey,
+    })
+  : null;
 
 interface SendEmailOptions {
   to: string;
@@ -31,28 +36,32 @@ const sendEmail = async ({
   html,
   text,
 }: SendEmailOptions): Promise<void> => {
-  if (!resend || !emailFrom) {
+  if (!brevo || !emailFrom) {
     console.warn(
-      `Email not sent to ${to}: Resend email service is not configured.`,
+      `Email not sent to ${to}: Brevo email service is not configured.`,
     );
     return;
   }
 
   try {
-    const { error } = await resend.emails.send({
-      from: emailFrom,
-      to,
+    const response = await brevo.transactionalEmails.sendTransacEmail({
+      sender: {
+        email: emailFrom,
+        name: "CampusHR",
+      },
+      to: [
+        {
+          email: to,
+        },
+      ],
       subject,
-      html,
-      text,
+      htmlContent: html,
+      textContent: text,
     });
 
-    if (error) {
-      console.error("Resend email error:", error);
-      throw new Error(error.message);
-    }
-
-    console.log(`Email sent successfully to ${to}`);
+    console.log(
+      `Email sent successfully to ${to}. Message ID: ${response.messageId}`,
+    );
   } catch (error) {
     console.error(`Failed to send email to ${to}:`, error);
     throw error;
