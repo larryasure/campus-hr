@@ -23,6 +23,7 @@ import academicSessionRoutes from "./routes/academicSessionRoutes.js";
 import adminLecturerRoutes from "./routes/adminLecturerRoutes.js";
 import adminWorkloadRoutes from "./routes/adminWorkloadRoutes.js";
 import adminRequestRoutes from "./routes/adminRequestRoutes.js";
+import emailTestRoutes from "./routes/emailTestRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -40,6 +41,7 @@ app.use("/api/academic-sessions", academicSessionRoutes);
 app.use("/api/admin/requests", adminRequestRoutes);
 app.use("/api/admin/lecturers", adminLecturerRoutes);
 app.use("/api/admin/workload", adminWorkloadRoutes);
+app.use("/api/email-test", emailTestRoutes);
 
 app.get("/api/check", (_req: Request, res: Response) => {
   res.json({
